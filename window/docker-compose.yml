@@ -1,3 +1,4 @@
+#windows
 version: "3"
 services:
     # web server
@@ -54,7 +55,7 @@ services:
             - ./logs/mysql:/var/lib/logs
         environment:
         #初始化密码
-            - MYSQL_ROOT_PASSWORD=HWK569267hwk
+            - MYSQL_ROOT_PASSWORD=123456
         restart: always
 
     # redis
@@ -78,20 +79,16 @@ services:
         container_name: mongo
         restart: always
         environment:
-            MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: 123456789
+            MONGO_INITDB_ROOT_USERNAME: root    #账号
+            MONGO_INITDB_ROOT_PASSWORD: 123456  #密码
         ports:
             - 27017:27017
         volumes:
             - ./mongo/db:/data/db
             - ./mongo/config:/etc/mongo/config
 
-    #composer
-    #composer:
-        #image: composer:1.9
-        #container_name: composer
-        #restart: always
-
 networks:
     frontend:
     backend:
+
+
