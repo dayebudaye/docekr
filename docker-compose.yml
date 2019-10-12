@@ -1,0 +1,97 @@
+version: "3"
+services:
+    # web server
+    nginx:
+        image: nginx:1.17.4
+        container_name: nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        networks:
+            - frontend
+        volumes:
+            - ./www:/var/www
+            # nginx configs
+            - ./nginx1.17.4/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx1.17.4/conf.d/:/etc/nginx/conf.d/:ro
+            - ./certs/:/etc/nginx/certs/:ro
+            - ./logs/nginx/:/var/log/nginx:rw
+        restart: always
+        depends_on:
+            - php-fpm
+
+    # php-fpm
+    php-fpm:
+        build: ./php7.2.18-fpm
+        image: php:7.2.18-fpm
+        container_name: php-fpm
+        ports:
+            - "9000"
+        networks:
+            - frontend
+            - backend
+        volumes:
+            - ./www:/var/www
+            # 配置文件
+            - ./php7.2.18/php.ini:/usr/local/etc/php/php.ini:ro
+            - ./php7.2.18/fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+            - ./php7.2.18/fpm/php-fpm.conf:/usr/local/etc/php-fpm.conf:ro
+            - ./logs/php/:/var/log/php-fpm:rw
+            - ./php7.2.18/ext/:/usr/local/lib/php/extensions/no-debug-non-zts-20170718:rw
+        restart: always
+
+    # mysql
+    mysql:
+        image: mysql:5.7
+        container_name: mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - backend
+        volumes:
+            - ./mysql5.7/data:/usr/data:rw
+            - ./mysql5.7/my.cnf:/etc/mysql/my.cnf:ro
+            - ./logs/mysql:/var/lib/logs
+        environment:
+        #初始化密码
+            - MYSQL_ROOT_PASSWORD=HWK569267hwk
+        restart: always
+
+    # redis
+    redis:
+        image: redis:5.0.6
+        container_name: redis
+        ports:
+            - "6379:6379"
+        networks:
+            - backend
+        volumes:
+            - ./redis5.0.6/redis.conf:/etc/redis.conf:ro
+            # RDB AOF dir
+            - ./redis5.0.6/data:/var/lib/redis
+        entrypoint: ["redis-server", "/etc/redis.conf"]
+        restart: always
+
+    #mongo
+    mongo:
+        image: mongo
+        container_name: mongo
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: 123456789
+        ports:
+            - 27017:27017
+        volumes:
+            - ./mongo/db:/data/db
+            - ./mongo/config:/etc/mongo/config
+
+    #composer
+    #composer:
+        #image: composer:1.9
+        #container_name: composer
+        #restart: always
+
+networks:
+    frontend:
+    backend:
